@@ -4,6 +4,7 @@ namespace ParkingBuildingManagementSystem_BE.Services.Interfaces;
 
 public interface IAuthService
 {
-    Task<string> LoginAsync(LoginRequest request);
-    Task RegisterAsync(RegisterRequest request);
+    Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<RegisterResponse> RegisterAsync(RegisterRequest request);
+    Task<string> VerifyEmailAsync(VerifyEmailRequest request);
 }

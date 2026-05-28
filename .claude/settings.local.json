@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /d/Study/FPTU/Term8/SWP391/BE/ParkingBuildingManagementSystem_BE 2>/dev/null || ls -la /mnt/d/Study/FPTU/Term8/SWP391/BE/ParkingBuildingManagementSystem_BE 2>/dev/null || echo \"Trying PowerShell approach\")",
+      "Read(//mnt/d/Study/FPTU/Term8/SWP391/BE/**)",
+      "Bash(git ls-tree *)",
+      "Bash(Get-ChildItem -Recurse \"d:\\\\Study\\\\FPTU\\\\Term8\\\\SWP391\\\\BE\\\\ParkingBuildingManagementSystem_BE\" -File)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Remove-Item -Path \"Common\\\\Enums\\\\UserRole.cs\", \"Common\\\\Enums\\\\VehicleType.cs\", \"Common\\\\Enums\\\\SlotStatus.cs\", \"Common\\\\Enums\\\\SlotType.cs\", \"Common\\\\Enums\\\\PaymentStatus.cs\", \"Common\\\\Enums\\\\PaymentMethod.cs\", \"Common\\\\Utils\\\\ApiResponse.cs\", \"Common\\\\Utils\\\\PaginationResult.cs\", \"Common\\\\Exceptions\\\\NotFoundException.cs\", \"Common\\\\Exceptions\\\\BadRequestException.cs\" -Force)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Study\\\\FPTU\\\\Term8\\\\SWP391\\\\BE\\\\ParkingBuildingManagementSystem_BE\\\\ParkingBuildingManagementSystem_BE\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}
