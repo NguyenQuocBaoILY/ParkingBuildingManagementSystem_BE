@@ -120,7 +120,7 @@ public class PaymentService(
             BookingId     = bookingId,
             Amount        = booking.DepositPaid,
             PaymentType   = "deposit",
-            PaymentMethod = "online",
+            PaymentMethod = "payos",
             Status        = "pending",
             CreatedAt     = VnTime.Now
         };

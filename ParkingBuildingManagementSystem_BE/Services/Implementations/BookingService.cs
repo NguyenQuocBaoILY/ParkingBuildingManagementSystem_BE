@@ -106,7 +106,7 @@ public class BookingService(
             BookingId     = booking.Id,
             Amount        = policy.DepositAmount,
             PaymentType   = "deposit",
-            PaymentMethod = "online",
+            PaymentMethod = "payos",
             Status        = "pending",
             CreatedAt     = VnTime.Now
         };
