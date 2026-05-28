@@ -27,9 +27,14 @@ public class PaymentService(
 
     public async Task<string> CreatePaymentLinkAsync(Booking booking, Payment payment)
     {
+        // Dùng Unix timestamp (ms) làm OrderCode để tránh trùng với test data cũ trên PayOS sandbox
+        var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        payment.TransactionRef = orderCode.ToString();
+        await paymentRepository.SaveChangesAsync();
+
         var request = new CreatePaymentLinkRequest
         {
-            OrderCode = payment.Id,
+            OrderCode = orderCode,
             Amount = (int)booking.DepositPaid,
             // PayOS yêu cầu description ASCII-only, tối đa 25 ký tự, dùng làm nội dung CK ngân hàng
             Description = $"BOOKING #{booking.Id}",
@@ -59,9 +64,8 @@ public class PaymentService(
         // 2. Xác thực chữ ký HMAC-SHA256 — throws nếu signature sai
         var webhookData = await payOsClient.Webhooks.VerifyAsync(webhook);
 
-        // orderCode = Payment.Id được đặt khi tạo link
-        var paymentId = (int)webhookData.OrderCode;
-        var payment = await paymentRepository.GetByIdAsync(paymentId);
+        // orderCode = Unix timestamp ms được lưu trong TransactionRef khi tạo link
+        var payment = await paymentRepository.GetByTransactionRefAsync(webhookData.OrderCode.ToString());
         if (payment?.BookingId == null) return;
 
         // Idempotency: bỏ qua nếu webhook được gửi lại nhiều lần

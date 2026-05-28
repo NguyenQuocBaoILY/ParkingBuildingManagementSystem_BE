@@ -19,6 +19,9 @@ public class PaymentRepository(AppDbContext context) : IPaymentRepository
             .OrderByDescending(p => p.CreatedAt)
             .FirstOrDefaultAsync();
 
+    public async Task<Payment?> GetByTransactionRefAsync(string transactionRef) =>
+        await context.Payments.FirstOrDefaultAsync(p => p.TransactionRef == transactionRef);
+
     public async Task SaveChangesAsync() =>
         await context.SaveChangesAsync();
 }

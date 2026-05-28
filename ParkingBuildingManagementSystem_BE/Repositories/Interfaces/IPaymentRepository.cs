@@ -7,5 +7,6 @@ public interface IPaymentRepository
     Task AddAsync(Payment payment);
     Task<Payment?> GetByIdAsync(int paymentId);
     Task<Payment?> GetPendingByBookingIdAsync(int bookingId);
+    Task<Payment?> GetByTransactionRefAsync(string transactionRef);
     Task SaveChangesAsync();
 }
