@@ -54,7 +54,6 @@ namespace ParkingBuildingManagementSystem_BE.Migrations
                     phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
                     role = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     is_active = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    is_email_verified = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getdate())"),
                     updated_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getdate())")
                 },
@@ -134,30 +133,6 @@ namespace ParkingBuildingManagementSystem_BE.Migrations
                         column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "email_verification_tokens",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
-                    token = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
-                    token_type = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: false),
-                    expires_at = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    is_used = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getdate())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__email_verification_tokens__id", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_evt_user",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -513,18 +488,6 @@ namespace ParkingBuildingManagementSystem_BE.Migrations
                 name: "IX_bookings_vehicle_type_id",
                 table: "bookings",
                 column: "vehicle_type_id");
-
-            // email_verification_tokens
-            migrationBuilder.CreateIndex(
-                name: "UQ__evt__token",
-                table: "email_verification_tokens",
-                column: "token",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "idx_evt_user_type_used",
-                table: "email_verification_tokens",
-                columns: new[] { "user_id", "token_type", "is_used" });
 
             // floors
             migrationBuilder.CreateIndex(
