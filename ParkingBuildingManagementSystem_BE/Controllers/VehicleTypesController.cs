@@ -12,9 +12,6 @@ public class VehicleTypesController(
     IVehicleTypeService vehicleTypeService,
     ISlotService slotService) : ControllerBase
 {
-    /// <summary>
-    /// Lấy danh sách tất cả loại phương tiện. Không yêu cầu xác thực.
-    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<VehicleTypeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
@@ -30,9 +27,6 @@ public class VehicleTypesController(
         }
     }
 
-    /// <summary>
-    /// Lấy thông tin loại phương tiện theo ID.
-    /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(VehicleTypeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -49,9 +43,6 @@ public class VehicleTypesController(
         }
     }
 
-    /// <summary>
-    /// Tạo loại phương tiện mới. Chỉ Admin hoặc Manager.
-    /// </summary>
     [HttpPost]
     [Authorize(Policy = "ManagerOrAdmin")]
     [ProducesResponseType(typeof(VehicleTypeResponse), StatusCodes.Status201Created)]
@@ -72,9 +63,6 @@ public class VehicleTypesController(
         }
     }
 
-    /// <summary>
-    /// Cập nhật loại phương tiện theo ID. Chỉ Admin hoặc Manager.
-    /// </summary>
     [HttpPut("{id:int}")]
     [Authorize(Policy = "ManagerOrAdmin")]
     [ProducesResponseType(typeof(VehicleTypeResponse), StatusCodes.Status200OK)]
@@ -96,10 +84,6 @@ public class VehicleTypesController(
         }
     }
 
-    /// <summary>
-    /// Lấy thông tin slot còn trống theo loại phương tiện (real-time).
-    /// Chỉ hiển thị các tầng hỗ trợ loại phương tiện đã chọn.
-    /// </summary>
     [HttpGet("{id:int}/slots")]
     [ProducesResponseType(typeof(SlotAvailabilityResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -116,9 +100,6 @@ public class VehicleTypesController(
         }
     }
 
-    /// <summary>
-    /// Xóa loại phương tiện theo ID. Chỉ Admin. Không thể xóa nếu đang được sử dụng.
-    /// </summary>
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "AdminOnly")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

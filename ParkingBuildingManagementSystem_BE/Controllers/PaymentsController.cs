@@ -13,11 +13,6 @@ public class PaymentsController(
     IPaymentService paymentService,
     ILogger<PaymentsController> logger) : ControllerBase
 {
-    /// <summary>
-    /// Webhook endpoint để PayOS gọi sau khi thanh toán hoàn tất hoặc bị hủy.
-    /// Endpoint này KHÔNG yêu cầu xác thực — PayOS server gọi trực tiếp.
-    /// Luôn trả 200 OK để tránh PayOS retry vô hạn; lỗi nội bộ chỉ được log.
-    /// </summary>
     [HttpPost("payos/webhook")]
     [AllowAnonymous]
     [SwaggerOperation(Summary = "PayOS webhook callback (không cần auth)")]
@@ -39,13 +34,9 @@ public class PaymentsController(
         }
     }
 
-    /// <summary>
-    /// PayOS redirect user về đây sau khi thanh toán thành công.
-    /// Dùng tạm khi chưa có frontend — booking đã được confirmed qua webhook trước đó.
-    /// </summary>
     [HttpGet("success")]
     [AllowAnonymous]
-    [SwaggerOperation(Summary = "Landing page sau thanh toán thành công (dev placeholder)")]
+    [SwaggerOperation(Summary = "Landing page sau thanh toán thành công")]
     public IActionResult PaymentSuccess([FromQuery] string? code, [FromQuery] long? id, [FromQuery] string? cancel)
     {
         return Ok(new
@@ -56,13 +47,9 @@ public class PaymentsController(
         });
     }
 
-    /// <summary>
-    /// PayOS redirect user về đây khi hủy thanh toán.
-    /// Dùng tạm khi chưa có frontend — booking đã bị hủy qua webhook.
-    /// </summary>
     [HttpGet("cancel")]
     [AllowAnonymous]
-    [SwaggerOperation(Summary = "Landing page sau hủy thanh toán (dev placeholder)")]
+    [SwaggerOperation(Summary = "Landing page sau hủy thanh toán")]
     public IActionResult PaymentCancel([FromQuery] long? id)
     {
         return Ok(new
@@ -72,10 +59,6 @@ public class PaymentsController(
         });
     }
 
-    /// <summary>
-    /// Tạo lại PayOS checkout link cho booking đang pending_payment.
-    /// Dùng khi link cũ đã hết hạn hoặc lần tạo đầu bị lỗi.
-    /// </summary>
     [HttpPost("booking/{bookingId:int}/link")]
     [Authorize(Policy = "DriverOnly")]
     [SwaggerOperation(Summary = "Tạo lại link thanh toán PayOS (DriverOnly)")]

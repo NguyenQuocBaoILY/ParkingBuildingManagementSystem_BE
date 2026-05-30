@@ -34,8 +34,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<VFloorAvailability> VFloorAvailabilities { get; set; }
-
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     public virtual DbSet<VehicleType> VehicleTypes { get; set; }
@@ -536,21 +534,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("updated_at");
         });
 
-        modelBuilder.Entity<VFloorAvailability>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToView("v_floor_availability");
 
-            entity.Property(e => e.AvailableCount).HasColumnName("available_count");
-            entity.Property(e => e.FloorId).HasColumnName("floor_id");
-            entity.Property(e => e.FloorName)
-                .HasMaxLength(50)
-                .HasColumnName("floor_name");
-            entity.Property(e => e.OccupiedCount).HasColumnName("occupied_count");
-            entity.Property(e => e.ReservedCount).HasColumnName("reserved_count");
-            entity.Property(e => e.TotalSlots).HasColumnName("total_slots");
-        });
 
         modelBuilder.Entity<Vehicle>(entity =>
         {

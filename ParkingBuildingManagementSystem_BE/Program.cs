@@ -9,6 +9,7 @@ using ParkingBuildingManagementSystem_BE.Repositories.Implementations;
 using ParkingBuildingManagementSystem_BE.Repositories.Interfaces;
 using ParkingBuildingManagementSystem_BE.Services.Implementations;
 using ParkingBuildingManagementSystem_BE.Services.Interfaces;
+using Microsoft.Extensions.Options;
 using ParkingBuildingManagementSystem_BE.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,9 @@ builder.Services.Configure<JwtSettings>(
 
 builder.Services.Configure<PayOsSettings>(
     builder.Configuration.GetSection(PayOsSettings.SectionName));
+
+builder.Services.Configure<BookingSettings>(
+    builder.Configuration.GetSection(BookingSettings.SectionName));
 
 // ── PayOS ─────────────────────────────────────────────────────────────────────
 var payOsSettings = builder.Configuration.GetSection(PayOsSettings.SectionName).Get<PayOsSettings>()!;

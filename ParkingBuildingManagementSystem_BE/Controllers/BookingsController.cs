@@ -11,9 +11,6 @@ namespace ParkingBuildingManagementSystem_BE.Controllers;
 [Route("api/bookings")]
 public class BookingsController(IBookingService bookingService) : ControllerBase
 {
-    /// <summary>
-    /// Lấy danh sách booking của user đang đăng nhập.
-    /// </summary>
     [HttpGet]
     [Authorize(Policy = "DriverOnly")]
     [ProducesResponseType(typeof(IEnumerable<BookingResponse>), StatusCodes.Status200OK)]
@@ -36,9 +33,6 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Lấy chi tiết 1 booking theo ID. Chỉ xem được booking của chính mình.
-    /// </summary>
     [HttpGet("{id:int}")]
     [Authorize(Policy = "DriverOnly")]
     [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
@@ -62,10 +56,6 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Hủy booking. Chỉ cho phép khi status = pending_payment hoặc confirmed.
-    /// Nếu confirmed + quá CheckinDeadline → tự động chuyển expired thay vì cancel, cọc mất luôn.
-    /// </summary>
     [HttpPost("{id:int}/cancel")]
     [Authorize(Policy = "DriverOnly")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -90,10 +80,6 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Tạo booking mới. Chỉ Driver đã xác thực.
-    /// Trạng thái khởi tạo: pending_payment — chưa chiếm slot cho đến khi thanh toán cọc.
-    /// </summary>
     [HttpPost]
     [Authorize(Policy = "DriverOnly")]
     [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status201Created)]

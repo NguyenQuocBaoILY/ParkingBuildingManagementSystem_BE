@@ -1,13 +1,18 @@
 using FluentAssertions;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Moq;
 using ParkingBuildingManagementSystem_BE.Common;
+using ParkingBuildingManagementSystem_BE.Data;
 using ParkingBuildingManagementSystem_BE.DTOs;
 using ParkingBuildingManagementSystem_BE.Exceptions;
 using ParkingBuildingManagementSystem_BE.Models;
 using ParkingBuildingManagementSystem_BE.Repositories.Interfaces;
 using ParkingBuildingManagementSystem_BE.Services.Implementations;
 using ParkingBuildingManagementSystem_BE.Services.Interfaces;
+using ParkingBuildingManagementSystem_BE.Settings;
 
 namespace ParkingBuildingManagementSystem_BE.Tests;
 
@@ -19,8 +24,13 @@ namespace ParkingBuildingManagementSystem_BE.Tests;
 /// nên luồng "webhook xác nhận payment" được kiểm tra qua trạng thái booking đã confirmed
 /// trong GetByIdAsync tests — phần PayOS cần integration test riêng.
 /// </summary>
-public class BookingServiceTests
+public class BookingServiceTests : IDisposable
 {
+    // ── SQLite in-memory — chỉ dùng để hỗ trợ BeginTransactionAsync(IsolationLevel)
+    //    (InMemory provider không phải relational nên không support IsolationLevel)
+    private readonly SqliteConnection _connection;
+    private readonly AppDbContext _dbContext;
+
     // ── Mocks ─────────────────────────────────────────────────────────────────
 
     private readonly Mock<IVehicleTypeRepository> _vehicleTypeRepo = new();
@@ -35,17 +45,36 @@ public class BookingServiceTests
 
     public BookingServiceTests()
     {
-        _sut = new BookingService(
-            _vehicleTypeRepo.Object,
-            _floorRepo.Object,
-            _vehicleRepo.Object,
-            _pricingPolicyRepo.Object,
-            _bookingRepo.Object,
-            _paymentRepo.Object,
-            _paymentService.Object,
-            _qrCodeService.Object,
-            NullLogger<BookingService>.Instance);
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+        _dbContext = new AppDbContext(
+            new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options);
+
+        _sut = BuildSut();
     }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+        _connection.Dispose();
+    }
+
+    /// <summary>
+    /// Tạo BookingService với CheckinGraceMinutes tuỳ chọn.
+    /// Mặc định 30 — dùng _sut cho các test không liên quan đến setting.
+    /// </summary>
+    private BookingService BuildSut(int checkinGraceMinutes = 30) => new(
+        _dbContext,
+        Options.Create(new BookingSettings { CheckinGraceMinutes = checkinGraceMinutes }),
+        _vehicleTypeRepo.Object,
+        _floorRepo.Object,
+        _vehicleRepo.Object,
+        _pricingPolicyRepo.Object,
+        _bookingRepo.Object,
+        _paymentRepo.Object,
+        _paymentService.Object,
+        _qrCodeService.Object,
+        NullLogger<BookingService>.Instance);
 
     // ── Shared test data ──────────────────────────────────────────────────────
 
@@ -90,9 +119,9 @@ public class BookingServiceTests
         string licensePlate  = "51A-12345",
         DateTime? checkin    = null) => new()
     {
-        VehicleTypeId   = vehicleTypeId,
-        FloorId         = floorId,
-        LicensePlate    = licensePlate,
+        VehicleTypeId    = vehicleTypeId,
+        FloorId          = floorId,
+        LicensePlate     = licensePlate,
         ScheduledCheckin = checkin ?? FutureCheckin
     };
 
@@ -116,6 +145,50 @@ public class BookingServiceTests
         _paymentRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
         _paymentService.Setup(p => p.CreatePaymentLinkAsync(It.IsAny<Booking>(), It.IsAny<Payment>()))
                        .ReturnsAsync("https://pay.payos.vn/checkout/test");
+    }
+
+    // =========================================================================
+    // BookingSettings — CheckinGraceMinutes
+    // =========================================================================
+
+    [Theory]
+    [InlineData(30)]
+    [InlineData(45)]
+    [InlineData(60)]
+    public async Task CreateAsync_CheckinDeadline_EqualsScheduledCheckinPlusGraceMinutes(int graceMinutes)
+    {
+        // Arrange — dùng setting khác nhau, kiểm tra CheckinDeadline tính đúng
+        SetupHappyPathMocks(existingVehicle: null);
+        _vehicleRepo.Setup(r => r.AddAsync(It.IsAny<Vehicle>())).Returns(Task.CompletedTask);
+        _vehicleRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+        var sut = BuildSut(checkinGraceMinutes: graceMinutes);
+        var scheduledCheckin = VnTime.Now.AddDays(1);
+        var request = BuildRequest(checkin: scheduledCheckin);
+
+        // Act
+        var result = await sut.CreateAsync(userId: 1, request);
+
+        // Assert — CheckinDeadline phải khớp đúng với giá trị từ BookingSettings
+        result.CheckinDeadline.Should().Be(scheduledCheckin.AddMinutes(graceMinutes));
+    }
+
+    [Fact]
+    public async Task CreateAsync_DefaultGraceMinutes_Is30()
+    {
+        // Arrange — kiểm tra default value hoạt động đúng khi không set custom
+        SetupHappyPathMocks(existingVehicle: null);
+        _vehicleRepo.Setup(r => r.AddAsync(It.IsAny<Vehicle>())).Returns(Task.CompletedTask);
+        _vehicleRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+        var scheduledCheckin = VnTime.Now.AddDays(1);
+        var request = BuildRequest(checkin: scheduledCheckin);
+
+        // Act — dùng _sut với default CheckinGraceMinutes = 30
+        var result = await _sut.CreateAsync(userId: 1, request);
+
+        // Assert
+        result.CheckinDeadline.Should().Be(scheduledCheckin.AddMinutes(30));
     }
 
     // =========================================================================

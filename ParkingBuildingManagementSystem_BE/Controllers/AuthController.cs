@@ -27,9 +27,6 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Đăng ký tài khoản mới. Trả về 201 và gửi email xác minh đến địa chỉ đã đăng ký.
-    /// </summary>
     [HttpPost("register")]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,9 +44,6 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Xác minh email bằng mã OTP 6 số nhận được qua email.
-    /// </summary>
     [HttpPost("verify-email")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
